@@ -1,0 +1,54 @@
+{% extends "racetracker/layout.html" %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1>Enter Race Results</h1>
+    <h2>{{ race.track_name }}</h2>
+    {% if messages %}
+    <div class="mt-4 mb-3">
+        {% for message in messages %}
+        <div class="alert alert-danger">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <form method="post" action="{% url 'save_race' race.id %}">
+        {% csrf_token %}
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Position</th>
+                        <th>Racer</th>
+                        <th>Did Not Finish (DNF)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for position in positions %}
+                    <tr>
+                        <td>{{ position }}</td>
+                        <td>
+                            <select name="racer_{{ position }}" class="form-select">
+                                <option value="">Select a racer</option>
+                                {% for racer in season_racers %}
+                                <option value="{{ racer.id }}">{{ racer.racer.name }}{% if racer.constructor %} - {{ racer.constructor.name }}{% endif %}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td>
+                            <input type="checkbox" name="dnf_{{ position }}">
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary">Save Results</button>
+            <a href="{% url 'view_race' race.id %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

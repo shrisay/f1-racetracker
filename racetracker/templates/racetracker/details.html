@@ -1,0 +1,227 @@
+{% extends "racetracker/layout.html" %}
+{% load static %}
+
+{% block style %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const stats = document.querySelector('#toggle-stats')
+            const raceview = document.querySelector('#toggle-events')
+            document.querySelector('#stats').style.display = 'none';
+            document.querySelector('#event-view').style.display = 'block';
+            stats.addEventListener('click', () => {
+                document.querySelector('#stats').style.display = 'block';
+                document.querySelector('#event-view').style.display = 'none';
+
+                stats.classList.add('btn-primary');
+                stats.classList.remove('btn-outline-primary');
+                raceview.classList.add('btn-outline-primary');
+                raceview.classList.remove('btn-primary');
+            })
+
+            raceview.addEventListener('click', () => {
+                document.querySelector('#stats').style.display = 'none';
+                document.querySelector('#event-view').style.display = 'block';
+
+                raceview.classList.add('btn-primary');
+                raceview.classList.remove('btn-outline-primary');
+                stats.classList.add('btn-outline-primary');
+                stats.classList.remove('btn-primary');
+            })
+        })
+    </script>
+    {% if not alltime %}
+    <script src="{% static 'racetracker/details.js' %}"></script>
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+    <div class="my-5">
+        {% if alltime %}
+        <h1 data-season-id="{{ season.id }}">RaceTracker</h1>
+        {% else %}
+        <h1 data-season-id="{{ season.id }}">Competition: {{ season.name }}</h1>
+        {% endif %}
+        
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+
+        <div class="btn-group mb-4">
+            <button class="btn btn-primary" id="toggle-events">{%if alltime%}Competitions{%else%}Races{%endif%}</button>
+            <button class="btn btn-outline-primary" id="toggle-stats">Stats</button>
+        </div>
+
+        <div id="stats">
+            <h2>Racers</h2>
+            <table class="table table-hover table-responsive">
+                <thead>
+                    <tr>
+                        <th>Racer</th>
+                        {% if alltime %}
+                        <th>Races</th>
+                        {% else %}
+                        <th>Constructor</th>
+                        {% endif %}
+                        <th></th>
+                        <th>Points</th>
+                        <th>Wins</th>
+                        <th>Podiums</th>
+                        <th>Pole positions</th>
+                        {% if alltime %}
+                        <th>Championships</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody class="table-group-divider">
+                    {% for season_racer in racers %}
+                    <tr>
+                        {% if alltime %}
+                        <td>{{ season_racer.name }}</td>
+                        <td>{{ season_racer.races }}</td>
+                        {% else %}
+                        <td>{{ season_racer.racer.name }}</td>
+                        <td>{{ season_racer.constructor.name }}</td>
+                        {% endif %}
+                        <td></td>
+                        <td>{{ season_racer.points }}</td>
+                        <td>{{ season_racer.wins }}</td>
+                        <td>{{ season_racer.podiums }}</td>
+                        <td>{{ season_racer.poles }}</td>
+                        {% if alltime %}
+                        <td>{{ season_racer.wdc }}</td>
+                        {% endif %}
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td {% if alltime %}colspan="8"{%else%}colspan="7"{%endif%}>No racers {% if alltime %}for this user.{% else %}added to this competition.{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <h2 class="mt-4">Constructors</h2>
+            <table class="table table-hover table-responsive">
+                <thead>
+                    <tr>
+                        <th>Constructor</th>
+                        <th>Points</th>
+                        <th>Wins</th>
+                        <th>Podiums</th>
+                        <th>Pole positions</th>
+                        {% if alltime %}
+                        <th>Championships</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody class="table-group-divider">
+                    {% for season_constructor in constructors %}
+                    <tr>
+                        {% if alltime %}
+                        <td>{{ season_constructor.name }}</td>
+                        {% else %}
+                        <td>{{ season_constructor.constructor.name }}</td>
+                        {% endif %}
+                        <td>{{ season_constructor.points }}</td>
+                        <td>{{ season_constructor.wins }}</td>
+                        <td>{{ season_constructor.podiums }}</td>
+                        <td>{{ season_constructor.poles }}</td>
+                        {% if alltime %}
+                        <td>{{ season_constructor.wcc }}</td>
+                        {% endif %}
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6">No constructors {% if alltime %}for this user.{% else %}added to this competition.{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div id="event-view" data-season-id="{{ season.id }}">
+            {% if alltime %}
+            <h2>Competitions</h2>
+            <div class="list-group">
+                {% for season in seasons %}
+                <a href="{% url 'view_season' season.id %}" class="list-group-item list-group-item-action">
+                    {{ season.name }} - {{ season.race_number }} races
+                </a>
+                {% empty %}
+                No competitions added yet. <a href="{% url 'create' 'competition' %}">Add one now</a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <h2>Races</h2>
+            <div class="list-group mb-3">
+                {% for race in races %}
+                <div>
+                    <a href="{% url 'view_race' race.id %}" class="list-group-item list-group-item-action">
+                        <span id="race-name-{{ race.id }}" class="racenames" style="font-size:36px;">{{ race.name }}</span><br>
+                        <button class="btn btn-sm btn-outline-secondary edit-racename-button" data-race-id="{{ race.id }}" id="rename-button-{{ race.id }}">Edit name</button>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            {% if not season.is_closed %}
+                <div>
+                    <button class="btn btn-lg btn-primary" id="add-race-button">+Add Race</button><br><br>
+                    <a class="btn btn-primary" href="{% url 'add_constructors' season.id %}">Add competitors</a><br><br>
+                </div>
+            {% endif %}
+            {% endif %}
+            {% if not alltime %}
+                {% if can_close %}
+                    <div id="close-status"></div>
+                    {% if season.is_closed %}
+                        {% if season.wdc and season.wcc %}
+                        <div class="alert alert-success mb-3">
+                            This competition has ended.<br>
+                            Driver's Champion: {{ season.wdc }}<br>
+                            Constructor's Champion: {{ season.wcc }}
+                        </div>
+                        {% endif %}
+                        <div id="reopen-season">
+                            <button class="btn btn-sm btn-success" id="reopen-season-button">Reopen Competition</button>
+                        </div>
+                    {% else %}
+                        <div id="close-season">
+                            <button class="btn btn-sm btn-danger" id="close-season-button">Finish Competition</button>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div id="delete-confirmation">
+                        <button class="btn btn-sm btn-danger" id="delete-season">Delete Competition</button>
+                    </div>
+                    <div id="yes-delete">
+                        <div class="alert alert-danger">
+                            Are you sure you want to delete this competition forever? This cannot be undone.
+                        </div>
+                        <a href="{% url 'delete_season' season.id %}" class="btn btn-danger btn-sm">Delete</a>
+                        <button class="btn btn-secondary btn-sm" id="delete-no">Cancel</button>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>     
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const deleteConfirm = document.querySelector('#delete-confirmation');
+            const deleteSeason = document.querySelector('#yes-delete');
+            const deleteButton1 = document.querySelector('#delete-season');
+            const cancelDelete = document.querySelector('#delete-no');
+
+            if (deleteSeason) deleteSeason.style.display = 'none';
+
+            if (deleteConfirm && deleteSeason) {
+                deleteButton1.addEventListener('click', () => {
+                    deleteSeason.style.display = 'block';
+                    deleteConfirm.style.display = 'none';
+                })
+                cancelDelete.addEventListener('click', () => {
+                    deleteSeason.style.display = 'none';
+                    deleteConfirm.style.display = 'block';
+                })
+            }
+        });
+    </script>
+{% endblock %}                    

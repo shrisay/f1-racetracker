@@ -1,0 +1,19 @@
+{% extends "racetracker/layout.html" %}
+
+{% block body %}
+    <h2>{% if competition %}Create{% else %}Register{% endif %} a new {{ context }}:</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-primary">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST" action="{% url 'create' context %}">
+        {% csrf_token %}
+        <div class="form-group mb-3">
+            <input autofocus class="form-control" type="text" name="name" placeholder="Name" required>
+        </div>
+        <button type="submit" class="btn btn-primary">+Create {{ context.capitalize }}</button>
+    </form>
+{% endblock %}

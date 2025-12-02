@@ -1,0 +1,14 @@
+{% extends "racetracker/layout.html" %}
+
+{% block body %}
+    <div class="container mt-5">
+        <h1 class="text-center">All Seasons</h1>
+        <div class="list-group">
+            {% for season in seasons %}
+                <a href="{{ url 'view_season' season.id }}" class="list-group-item list-group-item-action">
+                    {{ season.name }} ({{ season.race_number }} Races)
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

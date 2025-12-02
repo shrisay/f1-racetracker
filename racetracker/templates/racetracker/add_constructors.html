@@ -1,0 +1,36 @@
+{% extends "racetracker/layout.html" %}
+
+{% block body %}
+    <h2>Competition: {{ season.name }}</h2>
+
+    <div class="alert alert-primary">
+        Select the constructors you wish to add to the season.
+    </div>
+
+    {% for message in messages %}
+        <div class="alert alert-danger">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <h4>Add Constructors:</h4>
+    <div>
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-2">
+                {% if constructors %}
+                    {% for constructor in constructors %}
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="constructors" value="{{ constructor.id }}" id="constructor{{ constructor.id }}">
+                        <label class="form-check-label" for="constructor{{ constructor.id }}">{{ constructor.name }}</label>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    All existing constructors have already been added to this season.
+                    <a href="{% url 'add_constructors' season.id %}">Add Constructors</a>.
+                {% endif %}
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Next: Add Racers</button>
+        </form>
+    </div>
+{% endblock %}

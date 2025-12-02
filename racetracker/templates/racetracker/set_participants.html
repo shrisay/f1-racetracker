@@ -1,0 +1,29 @@
+{% extends "racetracker/layout.html" %}
+
+{% block body %}
+    <h2 class="mb-3">Set Number of Participants for {{ race.name }}</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-danger mb-3">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="num_participants" class="form-label">
+                Enter number of participants (1–{{ max_racers }}):
+            </label>
+            <input type="number" class="form-control" name="num_participants" id="num_participants" min="1" max="{{ max_racers }}" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Confirm</button>
+    </form>
+    {% if next_url %}
+        <a href="{% url 'view_race' race.id %}" class="btn btn-secondary mt-2">Cancel</a>
+    {% else %}
+        <a href="{% url 'index' %}" class="btn btn-secondary mt-2">Cancel</a>
+    {% endif %}
+{% endblock %}
