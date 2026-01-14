@@ -3,7 +3,7 @@
 This project was built as a way for me to track my car games more efficiently. 
 
 In order to run this app, 
-''' python manage.py runserver '''
+``` python manage.py runserver ```
 
 The above command works under the assumption that Django has been set up on local computers. 
 
